@@ -34,7 +34,7 @@ public final class OmiTranslator extends AbstractTranslator {
     @Override
     public String query() throws Exception {
         HttpPost request = new HttpPost(Util.getUrlWithQueryString(url, formData));
-        CloseableHttpResponse response = httpClient.execute(request);
+        CloseableHttpResponse response = this.open().execute(request);
 
         HttpEntity entity = response.getEntity();
 

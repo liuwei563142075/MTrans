@@ -2,10 +2,12 @@ package com.swjtu.tts.impl;
 
 import com.swjtu.lang.LANG;
 import com.swjtu.tts.AbstractTTS;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.io.File;
 import java.io.FileReader;
 
 public final class GoogleTTS extends AbstractTTS{
@@ -43,7 +45,9 @@ public final class GoogleTTS extends AbstractTTS{
         String tk = "";
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         try {
-            FileReader reader = new FileReader("./tk/Google.js");
+            ClassPathResource classPathResource = new ClassPathResource("tk/Google.js");
+            File file = classPathResource.getFile();
+            FileReader reader = new FileReader(file);
             engine.eval(reader);
 
             if (engine instanceof Invocable) {

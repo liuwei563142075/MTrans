@@ -15,7 +15,7 @@ import java.io.IOException;
 public final class YoudaoTranslator extends AbstractTranslator {
     private static final String url = "http://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule";
 
-    public YoudaoTranslator(){
+    public YoudaoTranslator() {
         super(url);
     }
 
@@ -31,7 +31,7 @@ public final class YoudaoTranslator extends AbstractTranslator {
 
     @Override
     public void setFormData(LANG from, LANG to, String text) {
-        String slat = String.valueOf(System.currentTimeMillis() + (long)(Math.random() * 10 + 1));
+        String slat = String.valueOf(System.currentTimeMillis() + (long) (Math.random() * 10 + 1));
         String sign = Util.md5("fanyideskweb" + text + slat + "ebSeFb%=XZ%T[KZ)c(sy!");
 
         formData.put("i", text);
@@ -52,11 +52,11 @@ public final class YoudaoTranslator extends AbstractTranslator {
     public String query() throws Exception {
         HttpPost request = new HttpPost(Util.getUrlWithQueryString(url, formData));
 
-        request.setHeader("Cookie","OUTFOX_SEARCH_USER_ID=1799185238@10.169.0.83;");
-        request.setHeader("Referer","http://fanyi.youdao.com/");
-        request.setHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");
+        request.setHeader("Cookie", "OUTFOX_SEARCH_USER_ID=1799185238@10.169.0.83;");
+        request.setHeader("Referer", "http://fanyi.youdao.com/");
+        request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36");
 
-        CloseableHttpResponse httpResponse = httpClient.execute(request);
+        CloseableHttpResponse httpResponse = this.open().execute(request);
         HttpEntity httpEntity = httpResponse.getEntity();
         String result = EntityUtils.toString(httpEntity, "UTF-8");
         EntityUtils.consume(httpEntity);
@@ -68,6 +68,6 @@ public final class YoudaoTranslator extends AbstractTranslator {
     @Override
     public String parses(String text) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        return  mapper.readTree(text).path("translateResult").findPath("tgt").toString();
+        return mapper.readTree(text).path("translateResult").findPath("tgt").toString();
     }
 }

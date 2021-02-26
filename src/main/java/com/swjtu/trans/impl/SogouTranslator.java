@@ -9,11 +9,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -63,7 +65,7 @@ public final class SogouTranslator extends AbstractTranslator {
     public String query() throws Exception {
         HttpPost request = new HttpPost(Util.getUrlWithQueryString(url, formData));
 
-        CloseableHttpResponse httpResponse = httpClient.execute(request);
+        CloseableHttpResponse httpResponse = this.open().execute(request);
         HttpEntity httpEntity = httpResponse.getEntity();
         String result = EntityUtils.toString(httpEntity, "UTF-8");
         EntityUtils.consume(httpEntity);
@@ -82,13 +84,17 @@ public final class SogouTranslator extends AbstractTranslator {
         String result = "";
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         try {
-            FileReader reader = new FileReader("./tk/Sogou.js");
+            ClassPathResource classPathResource = new ClassPathResource("tk/Sogou.js");
+            File file = classPathResource.getFile();
+            FileReader reader = new FileReader(file);
             engine.eval(reader);
             if (engine instanceof Invocable) {
-                Invocable invoke = (Invocable)engine;
+                Invocable invoke = (Invocable) engine;
                 result = String.valueOf(invoke.invokeFunction("token"));
             }
         } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

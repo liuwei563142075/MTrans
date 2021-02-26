@@ -10,17 +10,23 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.Iterator;
 
-public final class GoogleTranslator extends AbstractTranslator {
+/**
+ * google翻译
+ */
+@Service
+public class GoogleTranslator extends AbstractTranslator {
     private static final String url = "https://translate.google.cn/translate_a/single";
 
-    public GoogleTranslator(){
+    public GoogleTranslator() {
         super(url);
     }
 
@@ -38,7 +44,8 @@ public final class GoogleTranslator extends AbstractTranslator {
 
     @Override
     public void setFormData(LANG from, LANG to, String text) {
-        formData.put("client", "t");
+//        formData.put("client", "t"); // client=t时没有client=gtx翻译的精准
+        formData.put("client", "gtx");
         formData.put("sl", langMap.get(from));
         formData.put("tl", langMap.get(to));
         formData.put("hl", "zh-CN");
@@ -70,7 +77,7 @@ public final class GoogleTranslator extends AbstractTranslator {
             uri.addParameter(key, value);
         }
         HttpUriRequest request = new HttpGet(uri.toString());
-        CloseableHttpResponse response = httpClient.execute(request);
+        CloseableHttpResponse response = this.open().execute(request);
         HttpEntity entity = response.getEntity();
 
         String result = EntityUtils.toString(entity, "utf-8");
@@ -84,19 +91,27 @@ public final class GoogleTranslator extends AbstractTranslator {
 
     @Override
     public String parses(String text) throws IOException {
+        StringBuilder sb = new StringBuilder();
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readTree(text).get(0).get(0).get(0).toString();
+        JsonNode jsonNode = mapper.readTree(text).get(0);
+        Iterator<JsonNode> iterator = jsonNode.iterator();
+        while (iterator.hasNext()) {
+            sb.append(iterator.next().get(0).textValue());
+        }
+        return sb.toString();
     }
 
     private String token(String text) {
         String tk = "";
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         try {
-            FileReader reader = new FileReader("./tk/Google.js");
+            ClassPathResource classPathResource = new ClassPathResource("tk/Google.js");
+            File file = classPathResource.getFile();
+            FileReader reader = new FileReader(file);
             engine.eval(reader);
 
             if (engine instanceof Invocable) {
-                Invocable invoke = (Invocable)engine;
+                Invocable invoke = (Invocable) engine;
                 tk = String.valueOf(invoke.invokeFunction("token", text));
             }
         } catch (Exception e) {

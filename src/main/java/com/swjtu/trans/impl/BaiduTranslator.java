@@ -11,19 +11,24 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * 百度翻译
+ */
 public final class BaiduTranslator extends AbstractTranslator {
     private static final String url = "https://fanyi.baidu.com/v2transapi";
 
-    public BaiduTranslator(){
+    public BaiduTranslator() {
         super(url);
     }
 
@@ -57,7 +62,7 @@ public final class BaiduTranslator extends AbstractTranslator {
         request.setHeader("Cookie", "xxx"); // fixme: 此处填写cookie
         request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36");
 
-        CloseableHttpResponse response = httpClient.execute(request);
+        CloseableHttpResponse response = this.open().execute(request);
         HttpEntity entity = response.getEntity();
 
         String result = EntityUtils.toString(entity, "UTF-8");
@@ -79,13 +84,17 @@ public final class BaiduTranslator extends AbstractTranslator {
         String result = "";
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("js");
         try {
-            FileReader reader = new FileReader("./tk/Baidu.js");
+            ClassPathResource classPathResource = new ClassPathResource("tk/Baidu.js");
+            File file = classPathResource.getFile();
+            FileReader reader = new FileReader(file);
             engine.eval(reader);
             if (engine instanceof Invocable) {
-                Invocable invoke = (Invocable)engine;
+                Invocable invoke = (Invocable) engine;
                 result = String.valueOf(invoke.invokeFunction("token", text, gtk));
             }
         } catch (ScriptException | NoSuchMethodException | FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

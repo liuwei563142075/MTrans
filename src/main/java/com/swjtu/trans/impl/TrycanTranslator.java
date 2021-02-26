@@ -12,6 +12,9 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
+/**
+ * trycan翻译：http://www.trycan.com/
+ */
 public final class TrycanTranslator extends AbstractTranslator {
     private static final String url = "http://fanyi.trycan.com/Transfer.do";
 
@@ -35,7 +38,7 @@ public final class TrycanTranslator extends AbstractTranslator {
     @Override
     public String query() throws Exception {
         HttpPost request = new HttpPost(Util.getUrlWithQueryString(url, formData));
-        CloseableHttpResponse response = httpClient.execute(request);
+        CloseableHttpResponse response = this.open().execute(request);
 
         HttpEntity entity = response.getEntity();
 

@@ -27,7 +27,11 @@ public abstract class AbstractHttpAttribute {
         this.url = url;
         this.formData = new HashMap<>();
         this.langMap = new HashMap<>();
-        this.httpClient = HttpClients.createDefault();
+    }
+
+    public CloseableHttpClient open() {
+        httpClient = HttpClients.createDefault();
+        return httpClient;
     }
 
     /**
@@ -46,7 +50,7 @@ public abstract class AbstractHttpAttribute {
      * and saving audio data.
      *
      * @param source source language
-     * @param text the content to be converted into speech
+     * @param text   the content to be converted into speech
      * @return the string form of the translated result.
      */
     public abstract String run(LANG source, String text);
@@ -56,7 +60,7 @@ public abstract class AbstractHttpAttribute {
      * and parsing text data.
      *
      * @param from source language
-     * @param to target language
+     * @param to   target language
      * @param text the content to be translated
      * @return the string form of the translated result.
      */
@@ -64,7 +68,8 @@ public abstract class AbstractHttpAttribute {
 
     /**
      * Release and close the resources of HTTP
-     * @param httpEntity http entity
+     *
+     * @param httpEntity   http entity
      * @param httpResponse http response
      */
     public void close(HttpEntity httpEntity, CloseableHttpResponse httpResponse) {

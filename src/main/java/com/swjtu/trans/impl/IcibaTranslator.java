@@ -5,16 +5,20 @@ import com.swjtu.lang.LANG;
 import com.swjtu.trans.AbstractTranslator;
 import com.swjtu.util.Util;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
+/**
+ * 金山词霸：http://www.iciba.com/
+ */
 public final class IcibaTranslator extends AbstractTranslator {
-    private static final String url = "http://fy.iciba.com/ajax.php?a=fy";
+    private static final String url = "http://www.iciba.com/";
 
-    public IcibaTranslator(){
+    public IcibaTranslator() {
         super(url);
     }
 
@@ -38,7 +42,9 @@ public final class IcibaTranslator extends AbstractTranslator {
     @Override
     public String query() throws Exception {
         HttpPost request = new HttpPost(Util.getUrlWithQueryString(url, formData));
-        CloseableHttpResponse response = httpClient.execute(request);
+        // 配置http请求信息代理等
+        //        request.setConfig(new RequestConfig());
+        CloseableHttpResponse response = this.open().execute(request);
 
         HttpEntity entity = response.getEntity();
 
